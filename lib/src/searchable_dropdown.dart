@@ -6,6 +6,8 @@ import 'dropdown_dialog.dart';
 import 'not_given.dart';
 import 'pointer_this_please.dart';
 
+typedef StringCallback = String? Function(dynamic value);
+
 class SearchableDropdown<T> extends StatefulWidget {
   final List<DropdownMenuItem<T>> items;
   final Function? onChanged;
@@ -30,7 +32,7 @@ class SearchableDropdown<T> extends StatefulWidget {
   final Function? onClear;
   final Function? selectedValueWidgetFn;
   final TextInputType keyboardType;
-  final Function? validator;
+  final StringCallback? validator;
   final bool multipleSelection;
   final List<int> selectedItems;
   final Function? displayItem;
@@ -96,7 +98,7 @@ class SearchableDropdown<T> extends StatefulWidget {
     VoidCallback? onClear,
     VoidCallback? selectedValueWidgetFn,
     TextInputType keyboardType = TextInputType.text,
-    VoidCallback? validator,
+    StringCallback? validator,
     bool assertUniqueValue = true,
     Function? displayItem,
     bool dialogBox = true,
@@ -195,7 +197,7 @@ class SearchableDropdown<T> extends StatefulWidget {
     Function? onClear,
     Function? selectedValueWidgetFn,
     TextInputType keyboardType = TextInputType.text,
-    Function? validator,
+    StringCallback? validator,
     Function? displayItem,
     bool dialogBox = true,
     BoxConstraints? menuConstraints,
@@ -325,10 +327,7 @@ class SearchableDropdownState<T> extends State<SearchableDropdown<T>> {
       widget.style ??
       (_enabled && !(widget.readOnly)
           ? Theme.of(context).textTheme.titleMedium ?? const TextStyle()
-          : Theme.of(context)
-              .textTheme
-              .titleMedium
-              ?.copyWith(color: _disabledIconColor)) ??
+          : Theme.of(context).textTheme.titleMedium?.copyWith(color: _disabledIconColor)) ??
       const TextStyle();
 
   Color? get _enabledIconColor {
@@ -357,9 +356,7 @@ class SearchableDropdownState<T> extends State<SearchableDropdown<T>> {
 
   Color? get _iconColor {
     // These colors are not defined in the Material Design spec.
-    return (_enabled && !(widget.readOnly)
-        ? _enabledIconColor
-        : _disabledIconColor);
+    return (_enabled && !(widget.readOnly) ? _enabledIconColor : _disabledIconColor);
   }
 
   bool get valid {
@@ -434,9 +431,7 @@ class SearchableDropdownState<T> extends State<SearchableDropdown<T>> {
       menuConstraints: widget.menuConstraints,
       menuBackgroundColor: widget.menuBackgroundColor,
       callOnPop: () {
-        if (!widget.dialogBox &&
-            widget.onChanged != null &&
-            selectedItems != null) {
+        if (!widget.dialogBox && widget.onChanged != null && selectedItems != null) {
           if (widget.onChanged != null) {
             widget.onChanged!(selectedResult);
           }
@@ -448,14 +443,11 @@ class SearchableDropdownState<T> extends State<SearchableDropdown<T>> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> items =
-        _enabled ? List<Widget>.from(widget.items) : <Widget>[];
+    final List<Widget> items = _enabled ? List<Widget>.from(widget.items) : <Widget>[];
     int? hintIndex;
     if (widget.hint != null || (!_enabled)) {
-      final Widget emplacedHint = _enabled
-          ? WidgetUtil.prepareWidget(widget.hint)
-          : DropdownMenuItem<Widget>(
-              child: WidgetUtil.prepareWidget(widget.disabledHint));
+      final Widget emplacedHint =
+          _enabled ? WidgetUtil.prepareWidget(widget.hint) : DropdownMenuItem<Widget>(child: WidgetUtil.prepareWidget(widget.disabledHint));
       hintIndex = items.length;
       items.add(DefaultTextStyle(
         style: _textStyle.copyWith(color: Theme.of(context).hintColor),
@@ -467,9 +459,7 @@ class SearchableDropdownState<T> extends State<SearchableDropdown<T>> {
     Widget innerItemsWidget = const SizedBox.shrink();
     List<Widget> list = <Widget>[];
     for (var item in selectedItems ?? []) {
-      list.add(widget.selectedValueWidgetFn != null
-          ? widget.selectedValueWidgetFn!(widget.items[item].value)
-          : items[item]);
+      list.add(widget.selectedValueWidgetFn != null ? widget.selectedValueWidgetFn!(widget.items[item].value) : items[item]);
     }
     if (list.isEmpty) {
       if (hintIndex != null) innerItemsWidget = items[hintIndex];
@@ -478,13 +468,10 @@ class SearchableDropdownState<T> extends State<SearchableDropdown<T>> {
         children: list,
       );
     }
-    final EdgeInsetsGeometry padding = ButtonTheme.of(context).alignedDropdown
-        ? kAlignedButtonPadding
-        : kUnalignedButtonPadding;
+    final EdgeInsetsGeometry padding = ButtonTheme.of(context).alignedDropdown ? kAlignedButtonPadding : kUnalignedButtonPadding;
 
     Widget clickable = InkWell(
-        key: const Key(
-            "clickableResultPlaceHolder"), //this key is used for running automated tests
+        key: const Key("clickableResultPlaceHolder"), //this key is used for running automated tests
         onTap: (widget.readOnly) || !_enabled
             ? null
             : () async {
@@ -505,16 +492,13 @@ class SearchableDropdownState<T> extends State<SearchableDropdown<T>> {
               },
         child: Row(
           children: <Widget>[
-            widget.isExpanded
-                ? Expanded(child: innerItemsWidget)
-                : innerItemsWidget,
+            widget.isExpanded ? Expanded(child: innerItemsWidget) : innerItemsWidget,
             IconTheme(
               data: IconThemeData(
                 color: _iconColor,
                 size: widget.iconSize,
               ),
-              child: WidgetUtil.prepareWidget(widget.icon,
-                  parameter: selectedResult),
+              child: WidgetUtil.prepareWidget(widget.icon, parameter: selectedResult),
             ),
           ],
         ));
@@ -544,10 +528,7 @@ class SearchableDropdownState<T> extends State<SearchableDropdown<T>> {
                         children: <Widget>[
                           IconTheme(
                             data: IconThemeData(
-                              color:
-                                  hasSelection && _enabled && !widget.readOnly
-                                      ? _enabledIconColor
-                                      : _disabledIconColor,
+                              color: hasSelection && _enabled && !widget.readOnly ? _enabledIconColor : _disabledIconColor,
                               size: widget.iconSize,
                             ),
                             child: widget.clearIcon,
@@ -564,12 +545,10 @@ class SearchableDropdownState<T> extends State<SearchableDropdown<T>> {
     const double bottom = 8.0;
     String validatorOutput = '';
     if (widget.validator != null) {
-      validatorOutput = widget.validator?.call(selectedResult);
+      validatorOutput = widget.validator?.call(selectedResult) ?? '';
     }
-    var labelOutput = WidgetUtil.prepareWidget(widget.label,
-        parameter: selectedResult, stringToWidgetFunction: (string) {
-      return Text(string,
-          style: const TextStyle(color: Colors.blueAccent, fontSize: 13));
+    var labelOutput = WidgetUtil.prepareWidget(widget.label, parameter: selectedResult, stringToWidgetFunction: (string) {
+      return Text(string, style: const TextStyle(color: Colors.blueAccent, fontSize: 13));
     });
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -587,8 +566,7 @@ class SearchableDropdownState<T> extends State<SearchableDropdown<T>> {
                     left: 0.0,
                     right: 0.0,
                     bottom: bottom,
-                    child: WidgetUtil.prepareWidget(widget.underline,
-                        parameter: selectedResult),
+                    child: WidgetUtil.prepareWidget(widget.underline, parameter: selectedResult),
                   ),
           ],
         ),
